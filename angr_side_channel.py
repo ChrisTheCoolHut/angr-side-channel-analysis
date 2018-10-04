@@ -49,7 +49,8 @@ def conc_trace_wrap((file_name, p, prog_input, input_stdin, letter)):
 
 def solve_ins_count_parallel(file_name, input_len, input_rev=False, input_stdin=True, processes=1):
 
-    p = angr.Project(file_name, load_options={'auto_load_libs':True}, use_sim_procedures=False)
+    #p = angr.Project(file_name, load_options={'auto_load_libs':True}, use_sim_procedures=False)
+    p = angr.Project(file_name, load_options={'auto_load_libs':False}, use_sim_procedures=True)
 
     trace_list = []
     input_in = "A"*input_len
@@ -104,7 +105,8 @@ def solve_ins_count_parallel(file_name, input_len, input_rev=False, input_stdin=
 
 def solve_ins_count(file_name, input_len, input_rev=False, input_stdin=True):
 
-    p = angr.Project(file_name, load_options={'auto_load_libs':True}, use_sim_procedures=False)
+    #p = angr.Project(file_name, load_options={'auto_load_libs':True}, use_sim_procedures=False)
+    p = angr.Project(file_name, load_options={'auto_load_libs':False}, use_sim_procedures=True)
 
     trace_list = []
     input_in = "A"*input_len
