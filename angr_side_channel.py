@@ -22,7 +22,7 @@ def trace_step(simgr):
     if len(simgr.active) > 0:
         for path in simgr.active:
             pc_list.append(hex(path.se.eval(path.regs.pc)))
-    print(trace_str + str(pc_list) )
+    print((trace_str + str(pc_list) ))
     #print(trace_str + str(pc_list) + "\r"),
     return simgr
 
@@ -30,21 +30,22 @@ def conc_trace(file_name, p, prog_input="", input_stdin=True):
     ret_dict = {}
     if input_stdin:
         my_stdin = angr.SimFile(name='my_stdin', content=prog_input, has_end=True)
-        state = p.factory.entry_state(args=[file_name], mode='tracing', stdin=my_stdin)
+        state = p.factory.entry_state(args=[file_name], mode='tracing', stdin=my_stdin, remove_options=angr.options.simplification)
     else:
-        state = p.factory.full_init_state(args=[file_name, prog_input], mode='tracing')
+        state = p.factory.full_init_state(args=[file_name, prog_input], mode='tracing', remove_options=angr.options.simplification)
     simgr = p.factory.simgr(state)
     simgr.run()
     ret_dict['count'] = 0
     if len(simgr.deadended) > 0:
         ret_dict['count'] = simgr.deadended[0].history.block_count
-        ret_dict['stdout'] = simgr.deadended[0].state.posix.dumps(1)
+        ret_dict['stdout'] = simgr.deadended[0].posix.dumps(1)
     elif len(simgr.errored) > 0:
         ret_dict['count'] = simgr.errored[0].state.history.block_count
-        ret_dict['stdout'] = simgr.errored[0].state.posix.dumps(1)
+        ret_dict['stdout'] = simgr.errored[0].posix.dumps(1)
     return ret_dict
     
-def conc_trace_wrap((file_name, p, prog_input, input_stdin, letter)):
+def conc_trace_wrap(xxx_todo_changeme):
+    (file_name, p, prog_input, input_stdin, letter) = xxx_todo_changeme
     return (letter, conc_trace(file_name, p, prog_input=prog_input, input_stdin=input_stdin), prog_input)
 
 def solve_ins_count_parallel(file_name, input_len, input_rev=False, input_stdin=True, processes=1):
@@ -54,7 +55,7 @@ def solve_ins_count_parallel(file_name, input_len, input_rev=False, input_stdin=
     trace_list = []
     input_in = "A"*input_len
     run_dict = {}
-    my_r = range(input_len)
+    my_r = list(range(input_len))
     if input_rev:
         my_r.reverse()
 
@@ -78,26 +79,29 @@ def solve_ins_count_parallel(file_name, input_len, input_rev=False, input_stdin=
                 trace_list.pop()
                 trace_list.reverse()
             os.system("clear")
-            print("Analyzing: {}".format(file_name))
-            print("Strategy : {}".format("Basic Block Count"))
-            print("Reverse : {}".format(input_rev))
-            print("Length : {}".format(input_len))
-            print("Current input: {}".format(input_in))
+            print(("Analyzing: {}".format(file_name)))
+            print(("Strategy : {}".format("Basic Block Count")))
+            print(("Reverse : {}".format(input_rev)))
+            print(("Length : {}".format(input_len)))
+            print(("Current input: {}".format(input_in)))
             print("Trace record:")
             for trace in trace_list:
-                print trace
-            if 'stdout' in run_dict[x].keys():
+                print(trace)
+            if 'stdout' in list(run_dict[x].keys()):
                 print("stdout:")
-                print(run_dict[x]['stdout'])
+                print((run_dict[x]['stdout']))
         m_pool.close()
         m_pool.join()
         input_in = list(input_in)
-        input_in[y] = max(run_dict.iteritems(), key=operator.itemgetter(1))[0]
+        n_dict = {}
+        for k,v in run_dict.items():
+            n_dict[k] = run_dict[k]['count']
+        input_in[y] = max(iter(n_dict.items()), key=operator.itemgetter(1))[0]
         input_in = ''.join(input_in)
-        print("{} - {}".format(y, input_in))
+        print(("{} - {}".format(y, input_in)))
         run_dict = {}
     print(input_in)
-    print(conc_trace(file_name, p, prog_input=input_in, input_stdin=input_stdin)['stdout'])
+    print((conc_trace(file_name, p, prog_input=input_in, input_stdin=input_stdin)['stdout']))
     return input_in
 
 
@@ -109,7 +113,7 @@ def solve_ins_count(file_name, input_len, input_rev=False, input_stdin=True):
     trace_list = []
     input_in = "A"*input_len
     run_dict = {}
-    my_r = range(input_len)
+    my_r = list(range(input_len))
     if input_rev:
         my_r.reverse()
 
@@ -126,24 +130,24 @@ def solve_ins_count(file_name, input_len, input_rev=False, input_stdin=True):
                 trace_list.pop()
                 trace_list.reverse()
             os.system("clear")
-            print("Analyzing: {}".format(file_name))
-            print("Strategy : {}".format("Basic Block Count"))
-            print("Reverse : {}".format(input_rev))
-            print("Length : {}".format(input_len))
-            print("Current input: {}".format(input_in))
+            print(("Analyzing: {}".format(file_name)))
+            print(("Strategy : {}".format("Basic Block Count")))
+            print(("Reverse : {}".format(input_rev)))
+            print(("Length : {}".format(input_len)))
+            print(("Current input: {}".format(input_in)))
             print("Trace record:")
             for trace in trace_list:
-                print trace
-            if 'stdout' in run_dict[x].keys():
+                print(trace)
+            if 'stdout' in list(run_dict[x].keys()):
                 print("stdout:")
-                print(run_dict[x]['stdout'])
+                print((run_dict[x]['stdout']))
         input_in = list(input_in)
-        input_in[y] = max(run_dict.iteritems(), key=operator.itemgetter(1))[0]
+        input_in[y] = max(iter(run_dict.items()), key=operator.itemgetter(1))[0]
         input_in = ''.join(input_in)
-        print("{} - {}".format(y, input_in))
+        print(("{} - {}".format(y, input_in)))
         run_dict = {}
     print(input_in)
-    print(conc_trace(file_name, p, prog_input=input_in, input_stdin=input_stdin)['stdout'])
+    print((conc_trace(file_name, p, prog_input=input_in, input_stdin=input_stdin)['stdout']))
     return input_in
 
 '''
@@ -154,9 +158,9 @@ def get_input_len(file_name, input_stdin=True):
     p = angr.Project(file_name, load_options={'auto_load_libs':True}, use_sim_procedures=False)
     len_dict = {}
     for x in range(1,40):
-        print("{} - {}".format(x, "A"*x))
+        print(("{} - {}".format(x, "A"*x)))
         len_dict[x] = conc_trace(file_name, p, prog_input="A"*x, input_stdin=input_stdin)
-    return max(len_dict.iteritems(), key=operator.itemgetter(1))[0]
+    return max(iter(len_dict.items()), key=operator.itemgetter(1))[0]
 
 
 def main():
